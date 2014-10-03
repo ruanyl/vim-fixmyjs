@@ -163,7 +163,6 @@ endfunction
 " @param {[String]} line2 The end line on which stop formating,
 " by default '$'
 func! Fixmyjs(...)
-  silent exec "w"
   let winview=winsaveview()
   let cursorPositions = s:getCursorAndMarksPositions()
   call map(cursorPositions, " extend (v:val,{'characters': s:getNumberOfNonSpaceCharactersFromTheStartOfFile(v:val)}) ")
@@ -171,27 +170,29 @@ func! Fixmyjs(...)
 
   let path = expand("%:p")
   let path = fnameescape(path)
-  let content = readfile(path)
+  let content = getline("1", "$")
   let engine = 'fixmyjs'
   call writefile(content, g:tmp_file_Fixmyjs)
 
   if executable(engine)
     call system(engine." -c ".g:jshintrc_Fixmyjs." ".g:tmp_file_Fixmyjs)
     let result = readfile(g:tmp_file_Fixmyjs)
-    call writefile(result, path)
+    "call writefile(result, path)
+    silent exec "1,$j"
+    call setline("1", result[0])
+    call append("1", result[1:])
   else
     " Executable bin doesn't exist
     call ErrorMsg('The '.engine.' is not executable!')
     return 1
   endif
 
-  silent exec "e"
   call winrestview(winview)
 
 endfun
 
 " If user doesn't set config_Fixmyjs in
-" .vimrc then look up it in .editorconfig
+" .vimrc then look up it in .jshintrc
 if empty(g:jshintrc_Fixmyjs)
   call FixmyjsApplyConfig(g:jshintrc_Fixmyjs)
 endif
