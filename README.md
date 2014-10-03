@@ -8,7 +8,7 @@ How to install
 ###Vundle
 Put this in your .vimrc
 
-``vim
+```vim
 Bundle 'ruanyl/vim-fixmyjs'
 ```
 
@@ -20,8 +20,11 @@ How to use
 
 first you need to install `fixmyjs`
 
+
       npm install -g fixmyjs
 
+
 For convenience it is recommended that you assign a key for this, like so:
+
 
       noremap <F3> :Fixmyjs<CR>
