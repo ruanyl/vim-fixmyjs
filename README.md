@@ -27,4 +27,4 @@ first you need to install `fixmyjs`
 For convenience it is recommended that you assign a key for this, like so:
 
 
-      noremap <F3> :Fixmyjs<CR>
+      noremap <Leader><Leader>f :Fixmyjs<CR>
