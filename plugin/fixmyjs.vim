@@ -175,7 +175,12 @@ func! Fixmyjs(...)
   call writefile(content, g:tmp_file_Fixmyjs)
 
   if executable(engine)
-    call system(engine." -c ".g:jshintrc_Fixmyjs." ".g:tmp_file_Fixmyjs)
+    if g:use_legacy_Fixmyjs == 1
+        call system(engine." -l -c ".g:jshintrc_Fixmyjs." ".g:tmp_file_Fixmyjs)
+    else
+        call system(engine." -c ".g:jshintrc_Fixmyjs." ".g:tmp_file_Fixmyjs)
+    endif
+
     let result = readfile(g:tmp_file_Fixmyjs)
     "call writefile(result, path)
     silent exec "1,$j"
