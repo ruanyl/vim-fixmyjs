@@ -28,3 +28,7 @@ For convenience it is recommended that you assign a key for this, like so:
 
 
       noremap <Leader><Leader>f :Fixmyjs<CR>
+
+Enable legacy mode:
+
+      let g:use_legacy_Fixmyjs = 1
