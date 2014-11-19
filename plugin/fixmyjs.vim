@@ -20,6 +20,10 @@ if !exists('g:jshintrc_Fixmyjs')
   let g:jshintrc_Fixmyjs = ''
 endif
 
+if !exists('g:use_legacy_Fixmyjs')
+    let g:use_legacy_Fixmyjs = 0
+endif
+
 " temporary file for content
 if !exists('g:tmp_file_Fixmyjs')
   let g:tmp_file_Fixmyjs = fnameescape(tempname().".js")
