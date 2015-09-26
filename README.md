@@ -24,6 +24,7 @@ How to use
     npm install -g fixmyjs
     or
     npm install -g eslint
+    npm install -g eslint-plugin-babel
     ```
 
 2. Config which autofix engine to use:
