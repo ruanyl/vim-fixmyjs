@@ -1,12 +1,11 @@
 vim-fixmyjs
 ===========
 
-auto fix your javascript using `fixmyjs`
+auto fix your javascript using `eslint` or `fixmyjs`
 
 How to install
 -----------------------
 ###Vundle
-Put this in your .vimrc
 
 ```vim
 Bundle 'ruanyl/vim-fixmyjs'
@@ -18,17 +17,40 @@ To update the plugin to the latest version, you can run `:BundleUpdate`.
 How to use
 ----------
 
-first you need to install `fixmyjs`
+1. first you need to install `fixmyjs` or `eslint`
 
 
-      npm install -g fixmyjs
+    ```
+    npm install -g fixmyjs
+    or
+    npm install -g eslint
+    ```
+
+2. Config which autofix engine to use:
+
+    ```
+    let g:fixmyjs_engine = 'eslint' (default)
+    or
+    let g:fixmyjs_engine = 'fixmyjs'
+    ```
+
+3. Config `.jshintrc` or `.eslintrc` path
+
+    ```
+    let g:fixmyjs_rc_path = 'path/to/.rc'
+    ```
+if you don't specify the path, it will try to find the `.rc` from `$HOME/.rc`, `$HOME/.vim/.rc`
 
 
-For convenience it is recommended that you assign a key for this, like so:
+4. For convenience it is recommended that you assign a key for this, like so:
 
 
-      noremap <Leader><Leader>f :Fixmyjs<CR>
+    ```
+    noremap <Leader><Leader>f :Fixmyjs<CR>
+    ```
 
-Enable legacy mode:
+5. For fixmyjs to enable legacy mode:
 
-      let g:use_legacy_Fixmyjs = 1
+    ```
+    let g:fixmyjs_legacy_jshint = 1
+    ```

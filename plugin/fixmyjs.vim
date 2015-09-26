@@ -6,34 +6,44 @@ if v:version < 700
 endif
 
 " check whether this script is already loaded
-if exists('g:loaded_Fixmyjs')
+if exists('g:fixmyjs_loaded')
   finish
 endif
 
-let g:loaded_Fixmyjs = 1
+let g:fixmyjs_loaded = 1
 
-if !exists('g:config_Fixmyjs')
-  let g:config_Fixmyjs = {}
+if !exists('g:fixmyjs_config')
+  let g:fixmyjs_config = {}
 endif
 
-if !exists('g:jshintrc_Fixmyjs')
-  let g:jshintrc_Fixmyjs = ''
+if !exists('g:fixmyjs_rc_path')
+  let g:fixmyjs_rc_path = ''
 endif
 
-if !exists('g:use_legacy_Fixmyjs')
-    let g:use_legacy_Fixmyjs = 0
+if !exists('g:fixmyjs_legacy_jshint')
+    let g:fixmyjs_legacy_jshint = 0
+endif
+
+if !exists('g:fixmyjs_engine')
+    let g:fixmyjs_engine = 'eslint'
+endif
+
+if g:fixmyjs_engine == 'eslint'
+    let g:fixmyjs_rc_filename = '.eslintrc'
+elseif g:fixmyjs_engine == 'fixmyjs'
+    let g:fixmyjs_rc_filename = '.jshintrc'
 endif
 
 " temporary file for content
-if !exists('g:tmp_file_Fixmyjs')
-  let g:tmp_file_Fixmyjs = fnameescape(tempname().".js")
+if !exists('g:fixmyjs_tmp_file')
+  let g:fixmyjs_tmp_file = fnameescape(tempname().".js")
 endif
 
 let s:supportedFileTypes = ['js']
 
 "% Helper functions and variables
 let s:plugin_Root_directory = fnamemodify(expand("<sfile>"), ":h")
-let s:paths_jshintrc = map(['$HOME/.jshintrc', '$HOME/.vim/.jshintrc', s:plugin_Root_directory.'/.jshintrc'], 'expand(v:val)')
+let s:rc_paths = map(['$HOME/'.g:fixmyjs_rc_filename, '$HOME/.vim/'.g:fixmyjs_rc_filename], 'expand(v:val)')
 
 " Function for debugging
 " @param {Any} content Any type which will be converted
@@ -141,10 +151,10 @@ endfunction
 " @return {Number} If apply was success then return '0' else '1'
 function FixmyjsApplyConfig(...)
 
-  let l:filepath = get(a:000, 0)
+  let l:filepath = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '') . "/" . g:fixmyjs_rc_filename
 
-  if empty(l:filepath)
-    let l:filepath = get(filter(copy(s:paths_jshintrc),'filereadable(v:val)'), 0)
+  if !filereadable(l:filepath)
+    let l:filepath = get(filter(copy(s:rc_paths),'filereadable(v:val)'), 0)
   endif
 
   if !filereadable(l:filepath)
@@ -153,7 +163,7 @@ function FixmyjsApplyConfig(...)
     return 1
   endif
 
-  let g:jshintrc_Fixmyjs = l:filepath
+  let g:fixmyjs_rc_path = l:filepath
 
   " All Ok! return '0'
   return 0
@@ -167,6 +177,12 @@ endfunction
 " @param {[String]} line2 The end line on which stop formating,
 " by default '$'
 func! Fixmyjs(...)
+  " If user doesn't set fixmyjs_config in
+  " .vimrc then look up it in .jshintrc
+  if empty(g:fixmyjs_rc_path)
+    call FixmyjsApplyConfig()
+  endif
+
   let winview=winsaveview()
   let cursorPositions = s:getCursorAndMarksPositions()
   call map(cursorPositions, " extend (v:val,{'characters': s:getNumberOfNonSpaceCharactersFromTheStartOfFile(v:val)}) ")
@@ -175,17 +191,21 @@ func! Fixmyjs(...)
   let path = expand("%:p")
   let path = fnameescape(path)
   let content = getline("1", "$")
-  let engine = 'fixmyjs'
-  call writefile(content, g:tmp_file_Fixmyjs)
+  "let engine = 'fixmyjs'
+  call writefile(content, g:fixmyjs_tmp_file)
 
-  if executable(engine)
-    if g:use_legacy_Fixmyjs == 1
-        call system(engine." -l -c ".g:jshintrc_Fixmyjs." ".g:tmp_file_Fixmyjs)
-    else
-        call system(engine." -c ".g:jshintrc_Fixmyjs." ".g:tmp_file_Fixmyjs)
+  if executable(g:fixmyjs_engine)
+    if g:fixmyjs_engine == 'fixmyjs'
+      if g:fixmyjs_legacy_jshint == 1
+          call system(g:fixmyjs_engine." -l -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
+      else
+          call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
+      endif
+    elseif g:fixmyjs_engine == 'eslint'
+      call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     endif
 
-    let result = readfile(g:tmp_file_Fixmyjs)
+    let result = readfile(g:fixmyjs_tmp_file)
     "call writefile(result, path)
     silent exec "1,$j"
     call setline("1", result[0])
@@ -200,9 +220,4 @@ func! Fixmyjs(...)
 
 endfun
 
-" If user doesn't set config_Fixmyjs in
-" .vimrc then look up it in .jshintrc
-if empty(g:jshintrc_Fixmyjs)
-  call FixmyjsApplyConfig(g:jshintrc_Fixmyjs)
-endif
 command!  Fixmyjs call Fixmyjs()
