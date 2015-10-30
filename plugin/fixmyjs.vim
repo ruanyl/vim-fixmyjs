@@ -32,6 +32,8 @@ if g:fixmyjs_engine == 'eslint'
     let g:fixmyjs_rc_filename = '.eslintrc'
 elseif g:fixmyjs_engine == 'fixmyjs'
     let g:fixmyjs_rc_filename = '.jshintrc'
+elseif g:fixmyjs_engine == 'jscs'
+    let g:fixmyjs_rc_filename = '.jscsrc'
 endif
 
 " temporary file for content
@@ -202,6 +204,8 @@ func! Fixmyjs(...)
           call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
       endif
     elseif g:fixmyjs_engine == 'eslint'
+      call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
+    elseif g:fixmyjs_engine == 'jscs'
       call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     endif
 
