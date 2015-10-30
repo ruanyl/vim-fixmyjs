@@ -1,7 +1,7 @@
 vim-fixmyjs
 ===========
 
-auto fix your javascript using `eslint` or `fixmyjs`
+auto fix your javascript using `eslint` or `fixmyjs` or `jscs`
 
 How to install
 -----------------------
@@ -33,9 +33,11 @@ How to use
     let g:fixmyjs_engine = 'eslint' (default)
     or
     let g:fixmyjs_engine = 'fixmyjs'
+    or
+    let g:fixmyjs_engine = 'jscs'
     ```
 
-3. Config `.jshintrc` or `.eslintrc` path
+3. Config `.jshintrc` or `.eslintrc` or `.jscsrc` path
 
     ```
     let g:fixmyjs_rc_path = 'path/to/.rc'
