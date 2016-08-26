@@ -57,3 +57,16 @@ if you don't specify the path, it will try to find the `.rc` from `$HOME/.rc`, `
     ```
     let g:fixmyjs_legacy_jshint = 1
     ```
+
+6. (optional) if you want to use `eslint/jshint/jscs` installed anywhere other than global ones, you can use:
+
+    ```
+    " use linting tool installed locally in node_modules folder
+    let g:fixmyjs_use_local = 1
+    ```
+
+    or you can config the path manually, for example:
+
+    ```
+    let g:fixmyjs_executable = 'path/to/eslint'
+    ```

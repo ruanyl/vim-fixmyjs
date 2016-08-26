@@ -36,6 +36,10 @@ elseif g:fixmyjs_engine == 'jscs'
     let g:fixmyjs_rc_filename = '.jscsrc'
 endif
 
+if !exists('g:fixmyjs_executable')
+    let g:fixmyjs_executable = g:fixmyjs_engine
+endif
+
 " temporary file for content
 if !exists('g:fixmyjs_tmp_file')
   let g:fixmyjs_tmp_file = fnameescape(tempname().".js")
@@ -44,8 +48,12 @@ endif
 let s:supportedFileTypes = ['js']
 
 "% Helper functions and variables
-let s:plugin_Root_directory = fnamemodify(expand("<sfile>"), ":h")
 let s:rc_paths = map(['$HOME/'.g:fixmyjs_rc_filename, '$HOME/.vim/'.g:fixmyjs_rc_filename], 'expand(v:val)')
+let s:project_root_path = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '')
+
+if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
+    let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
+endif
 
 " Function for debugging
 " @param {Any} content Any type which will be converted
@@ -153,7 +161,7 @@ endfunction
 " @return {Number} If apply was success then return '0' else '1'
 function FixmyjsApplyConfig(...)
 
-  let l:filepath = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '') . "/" . g:fixmyjs_rc_filename
+  let l:filepath = s:project_root_path . "/" . g:fixmyjs_rc_filename
 
   if !filereadable(l:filepath)
     let l:filepath = get(filter(copy(s:rc_paths),'filereadable(v:val)'), 0)
@@ -196,17 +204,18 @@ func! Fixmyjs(...)
   "let engine = 'fixmyjs'
   call writefile(content, g:fixmyjs_tmp_file)
 
-  if executable(g:fixmyjs_engine)
+  let g:fixmyjs_executable = expand(g:fixmyjs_executable)
+  if executable(g:fixmyjs_executable)
     if g:fixmyjs_engine == 'fixmyjs'
       if g:fixmyjs_legacy_jshint == 1
-          call system(g:fixmyjs_engine." -l -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
+          call system(g:fixmyjs_executable." -l -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
       else
-          call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
+          call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
       endif
     elseif g:fixmyjs_engine == 'eslint'
-      call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
+      call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     elseif g:fixmyjs_engine == 'jscs'
-      call system(g:fixmyjs_engine." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
+      call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     endif
 
     let result = readfile(g:fixmyjs_tmp_file)
@@ -216,7 +225,7 @@ func! Fixmyjs(...)
     call append("1", result[1:])
   else
     " Executable bin doesn't exist
-    call ErrorMsg('The '.engine.' is not executable!')
+    call ErrorMsg('The '.g:fixmyjs_engine.' is not executable!')
     return 1
   endif
 
