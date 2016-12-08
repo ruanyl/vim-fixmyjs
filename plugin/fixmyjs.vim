@@ -28,12 +28,14 @@ if !exists('g:fixmyjs_engine')
     let g:fixmyjs_engine = 'eslint'
 endif
 
-if g:fixmyjs_engine == 'eslint'
-    let g:fixmyjs_rc_filename = '.eslintrc'
-elseif g:fixmyjs_engine == 'fixmyjs'
-    let g:fixmyjs_rc_filename = '.jshintrc'
-elseif g:fixmyjs_engine == 'jscs'
-    let g:fixmyjs_rc_filename = '.jscsrc'
+if !exists('g:fixmyjs_rc_filename')
+  if g:fixmyjs_engine == 'eslint'
+      let g:fixmyjs_rc_filename = '.eslintrc'
+  elseif g:fixmyjs_engine == 'fixmyjs'
+      let g:fixmyjs_rc_filename = '.jshintrc'
+  elseif g:fixmyjs_engine == 'jscs'
+      let g:fixmyjs_rc_filename = '.jscsrc'
+  endif
 endif
 
 if !exists('g:fixmyjs_executable')
@@ -169,7 +171,7 @@ function FixmyjsApplyConfig(...)
 
   if !filereadable(l:filepath)
     " File doesn't exist then return '1'
-    call WarningMsg('Can not find global .jshintrc file!')
+    call WarningMsg('Can not find a valid config file: ' . g:fixmyjs_rc_filename . ' from your project root path or global paths')
     return 1
   endif
 
@@ -190,7 +192,10 @@ func! Fixmyjs(...)
   " If user doesn't set fixmyjs_config in
   " .vimrc then look up it in .jshintrc
   if empty(g:fixmyjs_rc_path)
-    call FixmyjsApplyConfig()
+    let l:config_file_not_exists = FixmyjsApplyConfig()
+    if l:config_file_not_exists
+      return 1
+    endif
   endif
 
   let winview=winsaveview()
