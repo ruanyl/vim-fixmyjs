@@ -35,6 +35,8 @@ if !exists('g:fixmyjs_rc_filename')
       let g:fixmyjs_rc_filename = '.jshintrc'
   elseif g:fixmyjs_engine == 'jscs'
       let g:fixmyjs_rc_filename = '.jscsrc'
+  elseif g:fixmyjs_engine == 'tslint' 
+      let g:fixmyjs_rc_filename = 'tsconfig.json'
   endif
 endif
 
@@ -220,6 +222,8 @@ func! Fixmyjs(...)
     elseif g:fixmyjs_engine == 'eslint'
       call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     elseif g:fixmyjs_engine == 'jscs'
+      call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
+    elseif g:fixmyjs_engine == 'tslint'
       call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     endif
 
