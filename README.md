@@ -5,7 +5,7 @@ auto fix your javascript using `eslint` or `fixmyjs` or `jscs` or `tslint`
 
 How to install
 -----------------------
-###Vundle
+### Vundle
 
 ```vim
 Bundle 'ruanyl/vim-fixmyjs'
