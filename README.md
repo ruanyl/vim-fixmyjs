@@ -1,7 +1,7 @@
 vim-fixmyjs
 ===========
 
-auto fix your javascript using `eslint` or `fixmyjs` or `jscs`
+auto fix your javascript using `eslint` or `fixmyjs` or `jscs` or `tslint`
 
 How to install
 -----------------------
