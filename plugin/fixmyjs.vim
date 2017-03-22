@@ -36,7 +36,7 @@ if !exists('g:fixmyjs_rc_filename')
   elseif g:fixmyjs_engine == 'jscs'
       let g:fixmyjs_rc_filename = '.jscsrc'
   elseif g:fixmyjs_engine == 'tslint' 
-      let g:fixmyjs_rc_filename = 'tsconfig.json'
+      let g:fixmyjs_rc_filename = 'tslint.json'
   endif
 endif
 
