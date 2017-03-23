@@ -1,11 +1,11 @@
 vim-fixmyjs
 ===========
 
-auto fix your javascript using `eslint` or `fixmyjs` or `jscs`
+auto fix your javascript using `eslint` or `fixmyjs` or `jscs` or `tslint`
 
 How to install
 -----------------------
-###Vundle
+### Vundle
 
 ```vim
 Bundle 'ruanyl/vim-fixmyjs'
@@ -17,7 +17,7 @@ To update the plugin to the latest version, you can run `:BundleUpdate`.
 How to use
 ----------
 
-1. first you need to install `fixmyjs` or `eslint`
+1. first you need to install `fixmyjs` or `eslint` (or `tslint`)
 
 
     ```
@@ -25,6 +25,8 @@ How to use
     or
     npm install -g eslint
     npm install -g eslint-plugin-babel
+    or
+    npm intall -g tslint
     ```
 
 2. Config which autofix engine to use:
@@ -35,6 +37,8 @@ How to use
     let g:fixmyjs_engine = 'fixmyjs'
     or
     let g:fixmyjs_engine = 'jscs'
+    or
+    let g:fixmyjs_engine = 'tslint'
     ```
 
 3. Config `.jshintrc` or `.eslintrc` or `.jscsrc` path
@@ -58,7 +62,7 @@ if you don't specify the path, it will try to find the `.rc` from `$HOME/.rc`, `
     let g:fixmyjs_legacy_jshint = 1
     ```
 
-6. (optional) if you want to use `eslint/jshint/jscs` installed anywhere other than global ones, you can use:
+6. (optional) if you want to use `eslint/jshint/jscs/tslint` installed anywhere other than global ones, you can use:
 
     ```
     " use linting tool installed locally in node_modules folder
