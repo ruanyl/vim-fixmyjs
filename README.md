@@ -3,6 +3,8 @@ vim-fixmyjs
 
 auto fix your javascript using `eslint` or `fixmyjs` or `jscs` or `tslint`
 
+![screenshot](https://cloud.githubusercontent.com/assets/486382/24611005/5af68f58-1889-11e7-9183-c3059a1d7849.gif)
+
 How to install
 -----------------------
 ### Vundle
