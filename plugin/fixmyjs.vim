@@ -28,6 +28,21 @@ if !exists('g:fixmyjs_engine')
     let g:fixmyjs_engine = 'eslint'
 endif
 
+let s:project_root_path = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '')
+func! s:get_rc_paths(filename)
+  return map([s:project_root_path . "/" . a:filename, '$HOME/'.a:filename, '$HOME/.vim/'.a:filename], 'expand(v:val)')
+endfun
+
+func! s:some_exist(paths)
+  for s:path in a:paths
+    if filereadable(s:path)
+      return 1
+    endif
+  endfor
+
+  return 0
+endfun
+
 if !exists('g:fixmyjs_rc_filename')
   if g:fixmyjs_engine == 'eslint'
       let g:fixmyjs_rc_filename = '.eslintrc'
@@ -37,6 +52,20 @@ if !exists('g:fixmyjs_rc_filename')
       let g:fixmyjs_rc_filename = '.jscsrc'
   elseif g:fixmyjs_engine == 'tslint' 
       let g:fixmyjs_rc_filename = 'tslint.json'
+  endif
+endif
+if type(g:fixmyjs_rc_filename) == type([])
+  for s:rc_filename in g:fixmyjs_rc_filename
+    let s:paths = s:get_rc_paths(s:rc_filename)
+    if s:some_exist(s:paths)
+      let g:fixmyjs_rc_filename = s:rc_filename
+      break
+    endif
+  endfor
+
+  " If no file matched, use the first one
+  if type(g:fixmyjs_rc_filename) == type([])
+    let g:fixmyjs_rc_filename = get(g:fixmyjs_rc_filename, 0)
   endif
 endif
 
@@ -52,8 +81,8 @@ endif
 let s:supportedFileTypes = ['js']
 
 "% Helper functions and variables
-let s:rc_paths = map(['$HOME/'.g:fixmyjs_rc_filename, '$HOME/.vim/'.g:fixmyjs_rc_filename], 'expand(v:val)')
-let s:project_root_path = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '')
+
+let s:rc_paths = s:get_rc_paths(g:fixmyjs_rc_filename)
 
 if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
     let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
@@ -165,11 +194,7 @@ endfunction
 " @return {Number} If apply was success then return '0' else '1'
 function FixmyjsApplyConfig(...)
 
-  let l:filepath = s:project_root_path . "/" . g:fixmyjs_rc_filename
-
-  if !filereadable(l:filepath)
-    let l:filepath = get(filter(copy(s:rc_paths),'filereadable(v:val)'), 0)
-  endif
+  let l:filepath = get(filter(copy(s:rc_paths),'filereadable(v:val)'), 0)
 
   if !filereadable(l:filepath)
     " File doesn't exist then return '1'
