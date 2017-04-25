@@ -48,7 +48,11 @@ How to use
     ```
     let g:fixmyjs_rc_path = 'path/to/.rc'
     ```
-if you don't specify the path, it will try to find the `.rc` from `$HOME/.rc`, `$HOME/.vim/.rc`
+if you don't specify the path, it will try to find the `.rc` from `$HOME/.rc`, `$HOME/.vim/.rc` or the root of your project directory.
+Note that this plugin considers the directory where your .git directory is located as the root of your project directory. This can cause
+some confusion when you have a valid `.eslintrc` config file but have not initialised git in the project directory. The plugin will fail
+to execute citing `Can not find a valid config file: .eslintrc from your project root path or global paths`.
+
 
 
 4. For convenience it is recommended that you assign a key for this, like so:
