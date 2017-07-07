@@ -29,18 +29,17 @@ if !exists('g:fixmyjs_engine')
 endif
 
 let s:project_root_path = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '')
-func! s:get_rc_paths(filename)
-  return map([s:project_root_path . "/" . a:filename, '$HOME/'.a:filename, '$HOME/.vim/'.a:filename], 'expand(v:val)')
-endfun
 
-func! s:some_exist(paths)
-  for s:path in a:paths
-    if filereadable(s:path)
-      return 1
-    endif
+let s:possible_paths = [s:project_root_path, '$HOME', '$HOME/.vim']
+
+func! s:get_rc_paths(filename)
+  let l:result = []
+  for l:possible_path in s:possible_paths
+    call add(l:result, expand(l:possible_path . '/' . a:filename))
   endfor
 
-  return 0
+  echo l:result
+  return l:result
 endfun
 
 if !exists('g:fixmyjs_rc_filename')
@@ -54,11 +53,22 @@ if !exists('g:fixmyjs_rc_filename')
       let g:fixmyjs_rc_filename = 'tslint.json'
   endif
 endif
+" If g:fixmyjs_rc_filename is an array, we replace it with the filename that is found first
+" using the list of possible paths
 if type(g:fixmyjs_rc_filename) == type([])
-  for s:rc_filename in g:fixmyjs_rc_filename
-    let s:paths = s:get_rc_paths(s:rc_filename)
-    if s:some_exist(s:paths)
-      let g:fixmyjs_rc_filename = s:rc_filename
+  let s:rc_filename_found = 0
+
+  for s:path in s:possible_paths
+    for s:rc_filename in g:fixmyjs_rc_filename
+      let s:full_path = s:path . '/' . s:rc_filename
+      if filereadable(s:full_path)
+        let g:fixmyjs_rc_filename = s:rc_filename
+        let s:rc_filename_found = 1
+        break
+      endif
+    endfor
+
+    if s:rc_filename_found
       break
     endif
   endfor
@@ -81,8 +91,6 @@ endif
 let s:supportedFileTypes = ['js']
 
 "% Helper functions and variables
-
-let s:rc_paths = s:get_rc_paths(g:fixmyjs_rc_filename)
 
 if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
     let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
@@ -193,7 +201,7 @@ endfunction
 " @param {String} filepath path to configuration 'editorconfig' file.
 " @return {Number} If apply was success then return '0' else '1'
 function FixmyjsApplyConfig(...)
-
+  let s:rc_paths = s:get_rc_paths(g:fixmyjs_rc_filename)
   let l:filepath = get(filter(copy(s:rc_paths),'filereadable(v:val)'), 0)
 
   if !filereadable(l:filepath)
