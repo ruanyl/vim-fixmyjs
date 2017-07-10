@@ -12,90 +12,6 @@ endif
 
 let g:fixmyjs_loaded = 1
 
-if !exists('g:fixmyjs_config')
-  let g:fixmyjs_config = {}
-endif
-
-if !exists('g:fixmyjs_rc_path')
-  let g:fixmyjs_rc_path = ''
-endif
-
-if !exists('g:fixmyjs_legacy_jshint')
-    let g:fixmyjs_legacy_jshint = 0
-endif
-
-if !exists('g:fixmyjs_engine')
-    let g:fixmyjs_engine = 'eslint'
-endif
-
-let s:project_root_path = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '')
-
-let s:possible_paths = [s:project_root_path, '$HOME', '$HOME/.vim']
-
-func! s:get_rc_paths(filename)
-  let l:result = []
-  for l:possible_path in s:possible_paths
-    call add(l:result, expand(l:possible_path . '/' . a:filename))
-  endfor
-
-  echo l:result
-  return l:result
-endfun
-
-if !exists('g:fixmyjs_rc_filename')
-  if g:fixmyjs_engine == 'eslint'
-      let g:fixmyjs_rc_filename = '.eslintrc'
-  elseif g:fixmyjs_engine == 'fixmyjs'
-      let g:fixmyjs_rc_filename = '.jshintrc'
-  elseif g:fixmyjs_engine == 'jscs'
-      let g:fixmyjs_rc_filename = '.jscsrc'
-  elseif g:fixmyjs_engine == 'tslint' 
-      let g:fixmyjs_rc_filename = 'tslint.json'
-  endif
-endif
-" If g:fixmyjs_rc_filename is an array, we replace it with the filename that is found first
-" using the list of possible paths
-if type(g:fixmyjs_rc_filename) == type([])
-  let s:rc_filename_found = 0
-
-  for s:path in s:possible_paths
-    for s:rc_filename in g:fixmyjs_rc_filename
-      let s:full_path = s:path . '/' . s:rc_filename
-      if filereadable(s:full_path)
-        let g:fixmyjs_rc_filename = s:rc_filename
-        let s:rc_filename_found = 1
-        break
-      endif
-    endfor
-
-    if s:rc_filename_found
-      break
-    endif
-  endfor
-
-  " If no file matched, use the first one
-  if type(g:fixmyjs_rc_filename) == type([])
-    let g:fixmyjs_rc_filename = get(g:fixmyjs_rc_filename, 0)
-  endif
-endif
-
-if !exists('g:fixmyjs_executable')
-    let g:fixmyjs_executable = g:fixmyjs_engine
-endif
-
-" temporary file for content
-if !exists('g:fixmyjs_tmp_file')
-  let g:fixmyjs_tmp_file = fnameescape(tempname().".js")
-endif
-
-let s:supportedFileTypes = ['js']
-
-"% Helper functions and variables
-
-if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
-    let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
-endif
-
 " Function for debugging
 " @param {Any} content Any type which will be converted
 " to string and write to tmp file
@@ -118,6 +34,84 @@ fun! ErrorMsg(message)
   echoerr string(a:message)
 endfun
 
+if !exists('g:fixmyjs_config')
+  let g:fixmyjs_config = {}
+endif
+
+if !exists('g:fixmyjs_rc_path')
+  let g:fixmyjs_rc_path = ''
+endif
+
+if !exists('g:fixmyjs_legacy_jshint')
+    let g:fixmyjs_legacy_jshint = 0
+endif
+
+if !exists('g:fixmyjs_engine')
+    let g:fixmyjs_engine = 'eslint'
+endif
+
+let s:project_root_path = substitute(system("git rev-parse --show-toplevel"), '\n\+$', '', '')
+
+let s:possible_paths = [s:project_root_path, '$HOME', '$HOME/.vim']
+
+if !exists('g:fixmyjs_rc_filename')
+  if g:fixmyjs_engine == 'eslint'
+      let g:fixmyjs_rc_filename = '.eslintrc'
+  elseif g:fixmyjs_engine == 'fixmyjs'
+      let g:fixmyjs_rc_filename = '.jshintrc'
+  elseif g:fixmyjs_engine == 'jscs'
+      let g:fixmyjs_rc_filename = '.jscsrc'
+  elseif g:fixmyjs_engine == 'tslint'
+      let g:fixmyjs_rc_filename = 'tslint.json'
+  endif
+endif
+
+" If g:fixmyjs_rc_filename is an array, we replace it with the filename that is found first
+" using the list of possible paths
+func! s:find_rc_path()
+  let s:rc_file_found = 0
+  if type(g:fixmyjs_rc_filename) == type([])
+    for l:possible_path in s:possible_paths
+      for l:rc_filename in g:fixmyjs_rc_filename
+        let l:full_path = expand(l:possible_path . '/' . l:rc_filename)
+        if filereadable(l:full_path)
+          let g:fixmyjs_rc_path = l:full_path
+          let s:rc_file_found = 1
+          break
+        endif
+      endfor
+      if s:rc_file_found
+        break
+      endif
+    endfor
+  else
+    for l:possible_path in s:possible_paths
+      let l:full_path = l:possible_path . '/' . g:fixmyjs_rc_filename
+      if filereadable(l:full_path)
+        let g:fixmyjs_rc_path = l:full_path
+        let s:rc_file_found = 1
+        break
+      endif
+    endfor
+  endif
+endfun
+
+if !exists('g:fixmyjs_executable')
+    let g:fixmyjs_executable = g:fixmyjs_engine
+endif
+
+" temporary file for content
+if !exists('g:fixmyjs_tmp_file')
+  let g:fixmyjs_tmp_file = fnameescape(tempname().".js")
+endif
+
+let s:supportedFileTypes = ['js']
+
+"% Helper functions and variables
+
+if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
+    let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
+endif
 
 " Quoting string
 " @param {String} str Any string
@@ -167,7 +161,7 @@ function! s:getCursorPosition(numberOfNonBlankCharactersFromTheStartOfFile)
         let nonBlankCount = nonBlankCount + 1
       endif
       let charIndex = charIndex + 1
-      if nonBlankCount == a:numberOfNonBlankCharactersFromTheStartOfFile 
+      if nonBlankCount == a:numberOfNonBlankCharactersFromTheStartOfFile
         "Found position!
         return {'line': lineNumber,'column': charIndex}
       end
@@ -181,7 +175,7 @@ endfunction
 
 
 function! s:getCursorAndMarksPositions()
-  let localMarks = map(range(char2nr('a'), char2nr('z'))," \"'\".nr2char(v:val) ") 
+  let localMarks = map(range(char2nr('a'), char2nr('z'))," \"'\".nr2char(v:val) ")
   let marks = ['.'] + localMarks
   let result = {}
   for positionType in marks
@@ -194,43 +188,12 @@ function! s:getCursorAndMarksPositions()
   return result
 endfunction
 
-
-"% Declaring global variables and functions
-
-" Apply settings from 'editorconfig' file to fixmyjs
-" @param {String} filepath path to configuration 'editorconfig' file.
-" @return {Number} If apply was success then return '0' else '1'
-function FixmyjsApplyConfig(...)
-  let s:rc_paths = s:get_rc_paths(g:fixmyjs_rc_filename)
-  let l:filepath = get(filter(copy(s:rc_paths),'filereadable(v:val)'), 0)
-
-  if !filereadable(l:filepath)
-    " File doesn't exist then return '1'
-    call WarningMsg('Can not find a valid config file: ' . g:fixmyjs_rc_filename . ' from your project root path or global paths')
-    return 1
-  endif
-
-  let g:fixmyjs_rc_path = l:filepath
-
-  " All Ok! return '0'
-  return 0
-endfunction
-
-
-" Common function for fixmyjs
-" @param {String} type The type of file js, css, html
-" @param {[String]} line1 The start line from which will start
-" formating text, by default '1'
-" @param {[String]} line2 The end line on which stop formating,
-" by default '$'
 func! Fixmyjs(...)
-  " If user doesn't set fixmyjs_config in
-  " .vimrc then look up it in .jshintrc
-  if empty(g:fixmyjs_rc_path)
-    let l:config_file_not_exists = FixmyjsApplyConfig()
-    if l:config_file_not_exists
-      return 1
-    endif
+  call s:find_rc_path()
+  if !s:rc_file_found
+    " File doesn't exist then return '1'
+    call WarningMsg('Can not find a valid config file for ' . g:fixmyjs_engine)
+    return 1
   endif
 
   let winview=winsaveview()
