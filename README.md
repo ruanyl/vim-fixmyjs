@@ -48,10 +48,20 @@ How to use
     ```
     let g:fixmyjs_rc_path = 'path/to/.rc'
     ```
-if you don't specify the path, it will try to find the `.rc` from `$HOME/.rc`, `$HOME/.vim/.rc` or the root of your project directory.
+
+    OR
+
+    if you have projects which use different rc file names, for example: one project with `.eslintrc`  but the other project has `.eslintrc.json`,
+    in this case you should use (the array has an order):
+
+    ```
+    let g:fixmyjs_rc_filename = ['.eslintrc', '.eslintrc.json']
+    ```
+
+if you don't specify the path, it will try to find the `.rc` from root of your project directory, `$HOME/.rc`, `$HOME/.vim/.rc`.
 Note that this plugin considers the directory where your .git directory is located as the root of your project directory. This can cause
 some confusion when you have a valid `.eslintrc` config file but have not initialised git in the project directory. The plugin will fail
-to execute citing `Can not find a valid config file: .eslintrc from your project root path or global paths`.
+to execute citing `Can not find a valid config file...`.
 
 
 
