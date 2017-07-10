@@ -94,6 +94,7 @@ func! s:find_rc_path()
       endif
     endfor
   endif
+  return s:rc_file_found
 endfun
 
 if !exists('g:fixmyjs_executable')
@@ -190,10 +191,13 @@ endfunction
 
 func! Fixmyjs(...)
   call s:find_rc_path()
-  if !s:rc_file_found
+  if empty(g:fixmyjs_rc_path) || !filereadable(g:fixmyjs_rc_path)
     " File doesn't exist then return '1'
-    call WarningMsg('Can not find a valid config file for ' . g:fixmyjs_engine)
-    return 1
+    let l:found = s:find_rc_path()
+    if !l:found
+      call WarningMsg('Can not find a valid config file for ' . g:fixmyjs_engine)
+      return 1
+    endif
   endif
 
   let winview=winsaveview()
