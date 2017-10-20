@@ -118,81 +118,6 @@ if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
     let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
 endif
 
-" Quoting string
-" @param {String} str Any string
-" @return {String} The quoted string
-func! s:quote(str)
-  return '"'.escape(a:str,'"').'"'
-endfun
-
-
-" Helper functions for restoring mark and cursor position
-function! s:getNumberOfNonSpaceCharactersFromTheStartOfFile(position)
-  let cursorRow = a:position.line
-  let cursorColumn = a:position.column
-  let lineNumber = 1
-  let nonBlankCount = 0
-  while lineNumber <= cursorRow
-    let lineContent = getline(lineNumber)
-    if lineNumber == cursorRow
-      let lineContent = strpart(lineContent,0,cursorColumn)
-    endif
-    let charIndex = 0
-    while charIndex < len(lineContent)
-      let char = strpart(lineContent,charIndex,1)
-      if match(char,'\s\|\n\|\r') == -1
-        let nonBlankCount = nonBlankCount + 1
-      endif
-      let charIndex = charIndex + 1
-    endwhile
-    "echo nonBlankCount
-    let lineNumber = lineNumber + 1
-  endwhile
-  return nonBlankCount
-endfunction
-
-
-
-"Converts number of non blank characters to cursor position (line and column)
-function! s:getCursorPosition(numberOfNonBlankCharactersFromTheStartOfFile)
-  let lineNumber = 1
-  let nonBlankCount = 0
-  while lineNumber <= line('$')
-    let lineContent = getline(lineNumber)
-    let charIndex = 0
-    while charIndex < len(lineContent)
-      let char = strpart(lineContent,charIndex,1)
-      if match(char,'\s\|\n\|\r') == -1
-        let nonBlankCount = nonBlankCount + 1
-      endif
-      let charIndex = charIndex + 1
-      if nonBlankCount == a:numberOfNonBlankCharactersFromTheStartOfFile
-        "Found position!
-        return {'line': lineNumber,'column': charIndex}
-      end
-    endwhile
-    let lineNumber = lineNumber + 1
-  endwhile
-
-  "Oops, nothing found!
-  return {}
-endfunction
-
-
-function! s:getCursorAndMarksPositions()
-  let localMarks = map(range(char2nr('a'), char2nr('z'))," \"'\".nr2char(v:val) ")
-  let marks = ['.'] + localMarks
-  let result = {}
-  for positionType in marks
-    let cursorPositionAsList = getpos(positionType)
-    let cursorPosition = {'buffer': cursorPositionAsList[0], 'line': cursorPositionAsList[1], 'column': cursorPositionAsList[2]}
-    if cursorPosition.buffer == 0 && cursorPosition.line > 0
-      let result[positionType] = cursorPosition
-    endif
-  endfor
-  return result
-endfunction
-
 func! Fixmyjs(...)
   call s:find_rc_path()
   if empty(g:fixmyjs_rc_path) || !filereadable(g:fixmyjs_rc_path)
@@ -205,10 +130,6 @@ func! Fixmyjs(...)
   endif
 
   let winview=winsaveview()
-  let cursorPositions = s:getCursorAndMarksPositions()
-  call map(cursorPositions, " extend (v:val,{'characters': s:getNumberOfNonSpaceCharactersFromTheStartOfFile(v:val)}) ")
-
-
   let path = expand("%:p")
   let path = fnameescape(path)
   let content = getline("1", "$")
