@@ -145,9 +145,21 @@ let s:supportedFileTypes = ['js']
 
 "% Helper functions and variables
 
-if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
-    let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
-endif
+func! s:find_executable()
+  if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
+    let g:fixmyjs_node_modules = finddir('node_modules', '.;')
+    if !empty(g:fixmyjs_node_modules)
+      let g:fixmyjs_executable = getcwd() . '/' . g:fixmyjs_node_modules . '/.bin/' . g:fixmyjs_engine
+    endif
+    if !filereadable(g:fixmyjs_executable)
+      let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
+    endif
+    if !filereadable(g:fixmyjs_executable)
+      " fall back to system one if we can't find anything
+      let g:fixmyjs_executable = g:fixmyjs_engine
+    endif
+  endif
+endfun
 
 func! Fixmyjs(...)
   call s:find_rc_path()
@@ -159,6 +171,8 @@ func! Fixmyjs(...)
       return 1
     endif
   endif
+
+  call s:find_executable()
 
   let winview=winsaveview()
   let path = expand("%:p")
