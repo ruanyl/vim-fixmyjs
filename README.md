@@ -91,6 +91,13 @@ to execute citing `Can not find a valid config file...`.
     let g:fixmyjs_executable = 'path/to/eslint'
     ```
 
+7. If you want to do an upwards search for a configuration file based on the current working directory, you can specify:
+
+   ```
+   " search for config file upwards recursively, falling back to other configs
+   let g:fixmyjs_rc_local = 1
+   ```
+
 Sort import
 ----------
 
