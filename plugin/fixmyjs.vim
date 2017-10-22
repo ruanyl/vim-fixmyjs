@@ -46,6 +46,10 @@ if !exists('g:fixmyjs_rc_path')
   let g:fixmyjs_rc_path = ''
 endif
 
+if !exists('g:fixmyjs_rc_local')
+  let g:fixmyjs_rc_local = 0
+endif
+
 if !exists('g:fixmyjs_legacy_jshint')
     let g:fixmyjs_legacy_jshint = 0
 endif
@@ -74,6 +78,33 @@ endif
 " using the list of possible paths
 func! s:find_rc_path()
   let s:rc_file_found = 0
+
+  " If specified, try to find the nearest configuration file based on the
+  " current file
+  if g:fixmyjs_rc_local
+    if type(g:fixmyjs_rc_filename) == type([])
+      for l:rc_filename in g:fixmyjs_rc_filename
+        let l:rc_filename_found = findfile(l:rc_filename, '.;')
+        let l:full_path = l:rc_filename_found
+        if filereadable(l:full_path)
+          let g:fixmyjs_rc_path = l:full_path
+          let s:rc_file_found = 1
+          break
+        endif
+      endfor
+    else
+      let l:rc_filename_found = findfile(g:fixmyjs_rc_filename, '.;')
+      let l:full_path = l:rc_filename_found
+      if filereadable(l:full_path)
+        let g:fixmyjs_rc_path = l:full_path
+        let s:rc_file_found = 1
+      endif
+    endif
+    if s:rc_file_found
+      return s:rc_file_found
+    endif
+  endif
+
   if type(g:fixmyjs_rc_filename) == type([])
     for l:possible_path in s:possible_paths
       for l:rc_filename in g:fixmyjs_rc_filename
@@ -114,9 +145,21 @@ let s:supportedFileTypes = ['js']
 
 "% Helper functions and variables
 
-if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
-    let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
-endif
+func! s:find_executable()
+  if exists('g:fixmyjs_use_local') && g:fixmyjs_use_local
+    let g:fixmyjs_node_modules = finddir('node_modules', '.;')
+    if !empty(g:fixmyjs_node_modules)
+      let g:fixmyjs_executable = getcwd() . '/' . g:fixmyjs_node_modules . '/.bin/' . g:fixmyjs_engine
+    endif
+    if !filereadable(g:fixmyjs_executable)
+      let g:fixmyjs_executable = s:project_root_path . '/node_modules/.bin/' . g:fixmyjs_engine
+    endif
+    if !filereadable(g:fixmyjs_executable)
+      " fall back to system one if we can't find anything
+      let g:fixmyjs_executable = g:fixmyjs_engine
+    endif
+  endif
+endfun
 
 func! Fixmyjs(...)
   call s:find_rc_path()
@@ -128,6 +171,8 @@ func! Fixmyjs(...)
       return 1
     endif
   endif
+
+  call s:find_executable()
 
   let winview=winsaveview()
   let path = expand("%:p")
