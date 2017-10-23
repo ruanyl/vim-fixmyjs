@@ -97,32 +97,3 @@ to execute citing `Can not find a valid config file...`.
    " search for config file upwards recursively, falling back to other configs
    let g:fixmyjs_rc_local = 1
    ```
-
-Sort import
-----------
-
-Please refer to [import-sort](https://github.com/renke/import-sort) for more details
-
-Config example:
-```
-// enable auto sort import on write
-let g:fixmyjs_sort_import_on_write = 1
-
-// or you can do
-:SortImport
-
-// install import-sort packages
-npm install --save-dev import-sort-cli import-sort-parser-babylon import-sort-parser-typescript import-sort-style-renke
-
-// package.json:
-"importSort": {
-  ".js, .jsx, .es6, .es": {
-    "parser": "babylon",
-    "style": "renke"
-  },
-  ".ts, .tsx": {
-    "parser": "typescript",
-    "style": "renke"
-  }
-}
-```
