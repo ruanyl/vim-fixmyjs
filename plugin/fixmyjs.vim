@@ -159,7 +159,8 @@ endfun
 
 func! Fixmyjs(...)
   call s:find_rc_path()
-  if empty(g:fixmyjs_rc_path) || !filereadable(g:fixmyjs_rc_path)
+  " skip RC check for eslint engine to allow run eslint without config
+  if g:fixmyjs_engine != 'eslint' && (empty(g:fixmyjs_rc_path) || !filereadable(g:fixmyjs_rc_path))
     " File doesn't exist then return '1'
     let l:found = s:find_rc_path()
     if !l:found
@@ -186,7 +187,12 @@ func! Fixmyjs(...)
           call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." ".g:fixmyjs_tmp_file)
       endif
     elseif g:fixmyjs_engine == 'eslint'
-      call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
+      if !empty(g:fixmyjs_rc_path)
+        call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
+      else
+        " Call eslint without specifiyng config
+        call system(g:fixmyjs_executable." --fix ".g:fixmyjs_tmp_file)
+      endif
     elseif g:fixmyjs_engine == 'jscs'
       call system(g:fixmyjs_executable." -c ".g:fixmyjs_rc_path." --fix ".g:fixmyjs_tmp_file)
     elseif g:fixmyjs_engine == 'tslint'
